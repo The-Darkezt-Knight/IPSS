@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,14 +31,14 @@ public class UserController {
         this.registrationService = Objects.requireNonNull(registrationService);
         this.userService = Objects.requireNonNull(userService);
     }
-
-    @RequestMapping("create")
+    
+    @PostMapping(value = "create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> registerStaff(@Valid @RequestBody RegisterRequest request) {
         registrationService.registerStaff(request);
 
         return ResponseEntity.status(HttpStatus.OK)
         .body("Successfully registered " + request.firstName()
-        .concat(" " + request.lastName().trim()  + "as an/a " + request.role()));
+        .concat(" " + request.lastName().trim()  + " as " + request.role()));
     }
 
     @GetMapping("list/all")

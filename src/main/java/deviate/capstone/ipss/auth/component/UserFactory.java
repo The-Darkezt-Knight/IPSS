@@ -7,6 +7,7 @@ import deviate.capstone.ipss.auth.entity.Role;
 import deviate.capstone.ipss.auth.entity.Sex;
 import deviate.capstone.ipss.auth.entity.User;
 import deviate.capstone.ipss.auth.service.PasswordService;
+import deviate.capstone.ipss.shared.Utility.EnumUtils;
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -25,8 +26,8 @@ public class UserFactory {
         .baranggay(request.baranggay().trim())
         .cityMunicpality(request.cityMunicipality().trim())
         .province(request.province().trim())
-        .sex(Sex.valueOf(request.sex().trim().toUpperCase()))
-        .role(Role.valueOf(request.role().trim().toUpperCase()))
+        .sex(EnumUtils.parseEnum(Sex.class, request.sex(), "sex"))
+        .role(EnumUtils.parseEnum(Role.class, request.role(), "role"))
         .govtEmail(request.govtEmail().trim())
         .govtId(request.govtId())
         .password(passwordService.createTemporaryPassword(request.lastName().trim(),request.govtId().toString()))

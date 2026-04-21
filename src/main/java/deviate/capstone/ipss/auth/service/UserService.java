@@ -13,6 +13,7 @@ import deviate.capstone.ipss.auth.entity.Sex;
 import deviate.capstone.ipss.auth.entity.User;
 import deviate.capstone.ipss.auth.repository.UserRepository;
 import deviate.capstone.ipss.shared.ResourceNotFoundException;
+import deviate.capstone.ipss.shared.Utility.EnumUtils;
 
 @Service
 public class UserService {
@@ -117,7 +118,7 @@ public class UserService {
         }
 
         if (request.sex() != null) {
-            Sex requestedSex = Sex.valueOf(request.sex().toUpperCase());
+            Sex requestedSex = EnumUtils.parseEnum(Sex.class, request.sex(), "sex");
             if (requestedSex != user.getSex()) {
                 user.setSex(requestedSex);
                 isUpdated = true;
@@ -125,7 +126,7 @@ public class UserService {
         }
 
         if (request.role() != null) {
-            Role requestedRole = Role.valueOf(request.role().toUpperCase());
+            Role requestedRole = EnumUtils.parseEnum(Role.class, request.role(), "role");
             if (requestedRole != user.getRole()) {
                 user.setRole(requestedRole);
                 isUpdated = true;

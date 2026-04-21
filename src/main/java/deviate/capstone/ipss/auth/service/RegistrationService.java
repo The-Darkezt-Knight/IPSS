@@ -1,5 +1,8 @@
 package deviate.capstone.ipss.auth.service;
 
+import java.util.Objects;
+import java.util.regex.Pattern;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -12,19 +15,23 @@ import jakarta.validation.ValidationException;
 
 @Service
 public class RegistrationService {
+
+    private static final Pattern GOV_PH_EMAIL = Pattern
+        .compile("^[a-zA-Z0-9.\\-]+@[a-zA-Z0-9.\\-]+\\.gov+\\.ph$",
+        Pattern.CASE_INSENSITIVE);
     
     private final UserRepository userRepository;
     private final UserFactory userFactory;
 
     public RegistrationService(UserRepository userRepository, UserFactory userFactory) {
-        this.userRepository = userRepository;
-        this.userFactory = userFactory;
+        this.userRepository = Objects.requireNonNull(userRepository);
+        this.userFactory = Objects.requireNonNull(userFactory);
     }
 
     public ResponseEntity<String> registerStaff(RegisterRequest request) {
 
-        if(!request.govtEmail().trim().endsWith("gov.ph")) {
-            throw new ValidationException("Must use a valid government Id");
+        if (!GOV_PH_EMAIL.matcher(request.govtEmail().trim()).matches()) {
+            throw new ValidationException("Must use a valid government email address");
         }
 
         if(userRepository.existsByGovtEmail(request.govtEmail().trim())) {
