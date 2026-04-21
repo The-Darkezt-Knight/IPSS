@@ -23,7 +23,8 @@ public class UserMapper {
             user.getRole().toString(),
             user.getGovtEmail(),
             user.getGovtId(),
-            user.isActive()
+            user.isActive(),
+            user.getPassword()
         );
     }
 }

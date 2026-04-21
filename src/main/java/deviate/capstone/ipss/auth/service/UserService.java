@@ -73,6 +73,7 @@ public class UserService {
         userRepository.delete(user);
     }
 
+    //Updates the users profile
     public String updateUserProfile(UpdateUserProfileRequest request) {
 
         Long userId = getIdByEmailAndGovtId(request.govtEmail(), request.govtId());

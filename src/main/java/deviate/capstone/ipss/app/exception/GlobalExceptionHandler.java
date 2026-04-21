@@ -2,6 +2,8 @@ package deviate.capstone.ipss.app.exception;
 
 import java.util.stream.Collectors;
 
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -11,6 +13,7 @@ import org.springframework.web.context.request.WebRequest;
 import deviate.capstone.ipss.shared.AppException;
 import deviate.capstone.ipss.shared.ForbiddenException;
 import deviate.capstone.ipss.shared.UnauthorizedException;
+import deviate.capstone.ipss.shared.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 
 @RestControllerAdvice
@@ -38,6 +41,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity
             .status(400)
             .body(ErrorResponse.of(400,"VALIDATION_ERROR", message));
+    }
+
+    //Handles all unvalidated requests
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(ValidationException ex, WebRequest request) {
+        log.warn("[VALIDATION_ERROR] path={} | message={}",
+            request.getDescription(false),
+            ex.getMessage()
+        );
+
+        return ResponseEntity
+            .status(400)
+            .body(ErrorResponse.of(400, "VALIDATION", ex.getMessage()));
     }
     
     //catches anything you didn't anticipate
@@ -67,10 +83,37 @@ public class GlobalExceptionHandler {
     //Simply tells a user don't have an access
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<ErrorResponse> handleForbidden(ForbiddenException ex) {
-        log.warn("[AUTH] Forbidden access attempt | message={}", ex.getMessage());
+        log.warn("[FORBIDDEN] Forbidden access attemp | message={}", ex.getMessage());
         return ResponseEntity
             .status(403)
             .body(ErrorResponse.of(403, "FORBIDDEN", ex.getMessage()));
     }
 
+
+    //Handles possible duplication of values when querying new user in the users table
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex, WebRequest request) {
+
+        log.warn("[CONFLICT] Data integrity violation | path={} | message={}",
+            request.getDescription(false),
+            ex.getMostSpecificCause().getCause()
+        );
+
+        String cause = ex.getMostSpecificCause().getMessage().toLowerCase();
+    
+        //Either this or Throwable's own message can be used
+        //This time, I'm using Throwable's
+        String message = "A registration conflict has occured";
+
+        if(cause.contains("uc_users_govt_email")) {
+            message = "govtEmail: Email already exists";
+        } else if(cause.contains("uc_users_govt_id")) {
+            message = "govtId: Employee ID already registered";
+        }
+
+        return ResponseEntity
+        .status(HttpStatus.CONFLICT)
+        .body(ErrorResponse.of(409, "CONFLICT", message));
+
+    }
 }
