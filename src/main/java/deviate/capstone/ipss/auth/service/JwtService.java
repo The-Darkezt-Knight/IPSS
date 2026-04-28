@@ -48,11 +48,11 @@ public class JwtService {
 
     // Extracts the email from inside the token
     public String extractEmail(String token) {
-        return Jwts.parser()
-            .verifyWith(key)
-            .build()
-            .parseSignedClaims(token)
-            .getPayload()
-            .getSubject();
+        return Jwts.parser()                //creates an object we can compare the incoming token with
+            .verifyWith(key)                //Places the key to be used for comparison
+            .build()                        //Ensures that the parser object can no longer be edited
+            .parseSignedClaims(token)       //Compares the incoming token to the parser object we just created
+            .getPayload()                   //If everything before went right, we get the payload content
+            .getSubject();                  //Of the payload, we get only the email
     }
 }

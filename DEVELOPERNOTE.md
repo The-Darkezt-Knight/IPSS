@@ -161,4 +161,4 @@ Implemented and updated the following:
 
 
 What's left:
-    I need to close all endpoints, and ensure that only the right person can have access to particular requests.
+    I need to close all endpoints, and ensure that only the right people can have access to particular requests.

@@ -28,10 +28,9 @@ public class GlobalExceptionHandler {
             .body(ErrorResponse.of(ex.getStatus(), ex.getCode(), ex.getMessage()));
     }
 
-
     // Catches @Valid / @Validated failures on request bodies
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorResponse> handleMethodArgumentException(MethodArgumentNotValidException ex) {
         String message = ex.getBindingResult()
             .getFieldErrors()
             .stream()
