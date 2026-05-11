@@ -11,7 +11,7 @@ import deviate.capstone.ipss.auth.Dto.Requests.RegisterRequest;
 import deviate.capstone.ipss.auth.component.UserFactory;
 import deviate.capstone.ipss.auth.entity.User;
 import deviate.capstone.ipss.auth.repository.UserRepository;
-import jakarta.validation.ValidationException;
+import deviate.capstone.ipss.shared.ValidationException;
 
 @Service
 public class RegistrationService {

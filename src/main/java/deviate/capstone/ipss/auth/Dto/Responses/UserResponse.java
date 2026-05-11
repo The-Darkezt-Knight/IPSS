@@ -15,7 +15,8 @@ public record UserResponse(
     String role,
     String govtEmail,
     Long govtId,
-    boolean isActive
+    boolean isActive,
+    String password
 ) {
     
 }
