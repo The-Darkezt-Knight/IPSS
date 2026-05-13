@@ -37,10 +37,10 @@ public class UserController {
     /**
      * This function registers a staff member with the provided details and returns a success message.
      * 
-     * @param request The `registerStaff` method is annotated with `@PreAuthorize("hasAnyRole('ADMIN')")`, which means that only users with the role of ADMIN are allowed to access this method. The method takes in a POST request with JSON data in the body, represented by the `RegisterRequest`
+     * @param request The `registerStaff` method is annotated with `@PreAuthorize("hasAnyRole('SUPERADMIN')")`, which means that only users with the role of SUPERADMIN are allowed to access this method. The method takes in a POST request with JSON data in the body, represented by the `RegisterRequest`
      * @return The method `registerStaff` is returning a `ResponseEntity` object with a status of OK (200) and a body containing a message indicating that the staff member has been successfully registered. The message includes the first name, last name, and role of the registered staff member.
      */
-    //@PreAuthorize("hasAnyRole('ADMIN')")
+    //@PreAuthorize("hasAnyRole('SUPERADMIN')")
     @PostMapping(value = "create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> registerStaff(@Valid @RequestBody RegisterRequest request) {
         registrationService.registerStaff(request);
