@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', ()=> {
         .then(data => {
             localStorage.setItem('token', data.token);
             localStorage.setItem('role', data.role);
+            localStorage.setItem('firstName', data.firstName);
             alert('Authentication successful');
 
             if(localStorage.getItem('role') === 'ROLE_ADMIN') {

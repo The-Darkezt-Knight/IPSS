@@ -53,7 +53,8 @@ public class AuthService {
             token,
             "Bearer",
             user.getId(),
-            user.getRole().name()
+            user.getRole().name(),
+            user.getFirstName()
         );
     }
 

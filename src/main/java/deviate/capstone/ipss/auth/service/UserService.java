@@ -33,6 +33,13 @@ public class UserService {
             .map(user -> userMapper.toDto(user)).toList();
     }
 
+    public UserResponse getUser(String email) {
+        User user = userRepository.findByGovtEmail(email)
+            .orElseThrow(()-> new ResourceNotFoundException("USER", email));
+
+        return userMapper.toDto(user);
+    }
+
 
     //Returns a single user via ID
     public UserResponse getUser(Long id) {
