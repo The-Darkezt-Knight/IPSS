@@ -47,7 +47,7 @@ public class ClientFactory {
         .birthYear(request.birthYear())
         .citizenship(request.citizenship())
 
-        .dtiKonekId(request.diffAbledType())
+        .dtiKonekId(request.dtiKonekId())
         .philippineIdentificationSystem(request.philippineIdentificationSystem())
 
         .region(region)
