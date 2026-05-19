@@ -44,20 +44,34 @@ async function saveClient(formData) {
             deviceId = crypto.randomUUID();
         }
 
-        const localId = crypto.randomUUID();
+        const isUpdate = !!formData.localId;
+        const localId = formData.localId || crypto.randomUUID();
         const dateNow = new Date().toISOString();
+
+        const db = await openDB();
+
+        // Preserve dateCreated if this is an update
+        let dateCreated = dateNow;
+        if (isUpdate) {
+            try {
+                const existingRecord = await getRecordById(localId);
+                if (existingRecord && existingRecord.dateCreated) {
+                    dateCreated = existingRecord.dateCreated;
+                }
+            } catch (err) {
+                console.error("Failed to fetch existing record for update:", err);
+            }
+        }
 
         const record = {
             ...formData,
             localId,
             serverId: null,
             syncStatus: "pending",
-            dateCreated: dateNow,
+            dateCreated,
             dateUpdated: dateNow,
             deviceId
         };
-
-        const db = await openDB();
 
         return new Promise((resolve, reject) => {
             try {
@@ -255,6 +269,50 @@ async function retryFailed() {
     });
 }
 
+async function getPendingRecords() {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        try {
+            const transaction = db.transaction(["clients"], "readonly");
+            const store = transaction.objectStore("clients");
+            const index = store.index("syncStatus");
+            const requestPending = index.getAll("pending");
+
+            requestPending.onsuccess = (eventPending) => {
+                const requestFailed = index.getAll("failed");
+                requestFailed.onsuccess = (eventFailed) => {
+                    const records = [...(eventPending.target.result || []), ...(eventFailed.target.result || [])];
+                    resolve(records);
+                };
+                requestFailed.onerror = (e) => reject(e.target.error);
+            };
+            requestPending.onerror = (e) => reject(e.target.error);
+        } catch (err) {
+            reject(err);
+        }
+    });
+}
+
+async function getRecordById(localId) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        try {
+            const transaction = db.transaction(["clients"], "readonly");
+            const store = transaction.objectStore("clients");
+            const request = store.get(localId);
+
+            request.onsuccess = (event) => {
+                resolve(event.target.result);
+            };
+            request.onerror = (event) => {
+                reject(event.target.error);
+            }
+        } catch (err) {
+            reject(err);
+        }
+    });
+}
+
 // Make functions available to the Service Worker importScripts and common environments
 if (typeof self !== "undefined") {
     self.openDB = openDB;
@@ -262,6 +320,8 @@ if (typeof self !== "undefined") {
     self.syncPendingRecords = syncPendingRecords;
     self.updateRecord = updateRecord;
     self.retryFailed = retryFailed;
+    self.getPendingRecords = getPendingRecords;
+    self.getRecordById = getRecordById;
 }
 if (typeof exports !== "undefined") {
     exports.openDB = openDB;
@@ -269,6 +329,8 @@ if (typeof exports !== "undefined") {
     exports.syncPendingRecords = syncPendingRecords;
     exports.updateRecord = updateRecord;
     exports.retryFailed = retryFailed;
+    exports.getPendingRecords = getPendingRecords;
+    exports.getRecordById = getRecordById;
 }
 
 // Register sync triggers

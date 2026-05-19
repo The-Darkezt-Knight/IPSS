@@ -192,6 +192,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const formData = new FormData(form);
+
+        const editRecordId = localStorage.getItem('editRecordId');
+        if (editRecordId) {
+            formData.append('localId', editRecordId);
+        }
+
         const birthdateRaw = String(formData.get('birthdate') || '').trim();
         const birthdate = birthdateRaw || new Date().toISOString().slice(0, 10);
         const birthYearRaw = parseInt(String(formData.get('birthYear') || '').trim(), 10);
@@ -212,6 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const payload = {
+            localId: formData.get('localId') || undefined,
             id: textOrDefault(formData.get('id')),
             oldId: textOrDefault(formData.get('oldId')),
             statusOfClient: textOrDefault(formData.get('statusOfClient')),
@@ -289,6 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             form.reset();
+            localStorage.removeItem('editRecordId');
             setOptions(provinceSelect, [], 'Select province');
             setOptions(citySelect, [], 'Select city / municipality');
             setOptions(baranggaySelect, [], 'Select baranggay');
@@ -310,5 +318,70 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    loadRegions();
+    async function initializeForm() {
+        await loadRegions();
+
+        const editRecordId = localStorage.getItem('editRecordId');
+        if (editRecordId && typeof getRecordById === 'function') {
+            try {
+                const record = await getRecordById(editRecordId);
+                if (record) {
+                    populateForm(record);
+                }
+            } catch (err) {
+                console.error('Failed to load record for editing:', err);
+            }
+        }
+    }
+
+    async function populateForm(data) {
+        // Simple text/number inputs
+        const simpleInputs = form.querySelectorAll('input:not([type="radio"]):not([type="checkbox"]), textarea, select');
+        simpleInputs.forEach(input => {
+            if (data[input.name] !== undefined) {
+                input.value = data[input.name];
+            }
+        });
+
+        // Radios
+        const radioGroups = ['sex', 'civilStatus', 'msmeClassification', 'categoryOfClient', 'socialClassification', 'levelOfDigitalization'];
+        radioGroups.forEach(groupName => {
+            if (data[groupName]) {
+                const radio = form.querySelector(`input[name="${groupName}"][value="${data[groupName]}"]`);
+                if (radio) radio.checked = true;
+            }
+        });
+
+        // Checkboxes
+        if (data.isSenior) {
+            const cb = form.querySelector('input[name="isSenior"]');
+            if (cb) cb.checked = true;
+        }
+        if (data.isIndigeneous) {
+            const cb = form.querySelector('input[name="isIndigeneous"]');
+            if (cb) cb.checked = true;
+        }
+
+        // Location dropdowns cascade population
+        if (data.regionCode) {
+            regionSelect.value = data.regionCode;
+            await loadProvinces(regionSelect.selectedOptions[0]?.textContent?.trim());
+
+            if (data.provinceCode) {
+                provinceSelect.value = data.provinceCode;
+                await loadCities(provinceSelect.selectedOptions[0]?.textContent?.trim());
+
+                if (data.cityMunicipalityCode) {
+                    citySelect.value = data.cityMunicipalityCode;
+                    await loadBaranggays(citySelect.selectedOptions[0]?.textContent?.trim());
+
+                    if (data.baranggayCode) {
+                        baranggaySelect.value = data.baranggayCode;
+                    }
+                }
+            }
+        }
+    }
+
+    initializeForm();
 });
