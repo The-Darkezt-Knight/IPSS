@@ -31,8 +31,9 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
 
             .authorizeHttpRequests(auth ->
-                auth.requestMatchers("/api/auth/login").permitAll()
-                .requestMatchers("/", "/index.html", "/view/**", "/css/**", "/js/**").permitAll()
+
+                    auth.requestMatchers("/api/auth/login").permitAll()
+                .requestMatchers("/", "/static/surveyor.js", "/index.html", "/view/**", "/css/**", "/js/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/api/user/create", "/api/client/**", "/api/location/**").permitAll()
                 .anyRequest().authenticated()
