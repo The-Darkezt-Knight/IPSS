@@ -34,7 +34,7 @@ public class SecurityConfig {
                 auth.requestMatchers("/api/auth/login").permitAll()
                 .requestMatchers("/", "/index.html", "/view/**", "/css/**", "/js/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
-                .requestMatchers("/api/user/create", "/api/client/**", "/api/location/**").permitAll()
+                .requestMatchers("/api/user/create").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
