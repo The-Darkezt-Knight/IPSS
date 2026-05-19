@@ -279,7 +279,7 @@ if (typeof window !== "undefined") {
         }
 
         if ("serviceWorker" in navigator) {
-            navigator.serviceWorker.register("/js/surveyor/service-worker.js")
+            navigator.serviceWorker.register("/service-worker.js")
             .then((registration) => {
                 // Ignore errors related to SyncManager not being supported on all browsers
                 if ("sync" in registration) {

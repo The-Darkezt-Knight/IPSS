@@ -263,20 +263,31 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.disabled = true;
 
         try {
-            const response = await fetch('/api/client/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            });
+            if (typeof saveClient === 'function') {
+                // Use offline-first strategy
+                await saveClient(payload);
+                if (navigator.onLine) {
+                    alert('Survey data submitted successfully!');
+                } else {
+                    alert('Survey data saved locally. It will be synced when you are online.');
+                }
+            } else {
+                // Fallback to direct network request
+                const response = await fetch('/api/client/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
 
-            if (!response.ok) {
-                const message = await response.text();
-                throw new Error(message || `Request failed (${response.status})`);
+                if (!response.ok) {
+                    const message = await response.text();
+                    throw new Error(message || `Request failed (${response.status})`);
+                }
+                alert('Survey data submitted successfully!');
             }
 
-            alert('Survey data submitted successfully!');
             form.reset();
             setOptions(provinceSelect, [], 'Select province');
             setOptions(citySelect, [], 'Select city / municipality');
@@ -290,6 +301,14 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.disabled = false;
         }
     });
+
+    const saveForSyncBtn = document.getElementById('save-for-sync-btn');
+    if (saveForSyncBtn) {
+        saveForSyncBtn.addEventListener('click', () => {
+            // Trigger the form submit event manually to run validations and payload generation
+            form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        });
+    }
 
     loadRegions();
 });
